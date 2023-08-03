@@ -31,7 +31,7 @@ class DataSetMaker:
         for i in range(window_len):
             self.slicesX[:, i] = self.seriesX[i:i + sample_len]
             self.slicesDate[:, i] = self.seriesDate[i:i + sample_len]
-        slicesDate -= slicesDate[:, -1:]
+        self.slicesDate -= self.slicesDate[:, -1:]
 
         return self.slicesX, self.slicesDate
 
