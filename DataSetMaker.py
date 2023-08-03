@@ -77,23 +77,23 @@ class DataSetMaker:
             self.trend_of_slices_x = np.zeros_like(self.slices_x)
     
             for i in range(sample_len):
-                tempWeight = np.diag(weight[i])
+                temp_weight = np.diag(weight[i])
                 moment_estimate_matrix = np.dot(
                     window_pattern[i].T,
-                    np.linalg.inv(window_pattern[i] @ tempWeight @ window_pattern[i].T)
+                    np.linalg.inv(window_pattern[i] @ temp_weight @ window_pattern[i].T)
                 )
 
-                trend_datas[i] = self.slices_x[i] @ tempWeight @ moment_estimate_matrix
+                trend_datas[i] = self.slices_x[i] @ temp_weight @ moment_estimate_matrix
                 self.trend_of_slices_x[i] = trend_datas[i] @ window_pattern[i]
     
         else:
-            tempWeight = np.diag(weight)
+            temp_weight = np.diag(weight)
             moment_estimate_matrix = np.dot(
                 window_pattern.T,
-                np.linalg.inv(window_pattern @ tempWeight @ window_pattern.T)
+                np.linalg.inv(window_pattern @ temp_weight @ window_pattern.T)
             )
     
-            trend_datas = self.slices_x @ tempWeight @ moment_estimate_matrix
+            trend_datas = self.slices_x @ temp_weight @ moment_estimate_matrix
     
             self.trend_of_slices_x = trend_datas @ window_pattern
         de_trended_x = self.slices_x - self.trend_of_slices_x
