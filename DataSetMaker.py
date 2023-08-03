@@ -76,7 +76,7 @@ class DataSetMaker:
     
         if useRealGap:
             TrendDatas = np.zeros([sample_len, poly_degree])
-            TrendOfSlicesX = np.zeros_like(slicesX)
+            TrendOfSlicesX = np.zeros_like(self.slicesX)
     
             for i in range(sample_len):
                 tempWeight = np.diag(weight[i])
