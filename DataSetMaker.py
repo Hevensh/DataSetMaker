@@ -114,8 +114,13 @@ class DataSetMaker:
         self,
         i = 0,
     ):
-        plt.plot(tempPattern,self.slices_x[i],'b-',
-            tempPattern,self.self.TrendOfslices_x[i],'g--',)
+        if self.use_real_gap:
+            temp_pattern = self.base_pattern[i]
+        else:
+            temp_pattern = self.base_pattern
+
+        plt.plot(temp_pattern,self.slices_x[i],'b-',
+            temp_pattern,self.self.TrendOfslices_x[i],'g--',)
         plt.legend(['real','trend'])
         plt.title(f'''the {i}-th slice ,
     real gap: {self.use_real_gap} ,
