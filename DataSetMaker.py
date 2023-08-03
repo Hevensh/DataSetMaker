@@ -74,7 +74,7 @@ class DataSetMaker:
     
         if use_real_gap:
             trend_datas = np.zeros([sample_len, poly_degree])
-            self.TrendOfslices_x = np.zeros_like(self.slices_x)
+            self.trend_of_slices_x = np.zeros_like(self.slices_x)
     
             for i in range(sample_len):
                 tempWeight = np.diag(weight[i])
@@ -84,7 +84,7 @@ class DataSetMaker:
                 )
 
                 trend_datas[i] = self.slices_x[i] @ tempWeight @ moment_estimate_matrix
-                self.TrendOfslices_x[i] = trend_datas[i] @ window_pattern[i]
+                self.trend_of_slices_x[i] = trend_datas[i] @ window_pattern[i]
     
         else:
             tempWeight = np.diag(weight)
@@ -95,8 +95,8 @@ class DataSetMaker:
     
             trend_datas = self.slices_x @ tempWeight @ moment_estimate_matrix
     
-            self.TrendOfslices_x = trend_datas @ window_pattern
-        de_trended_x = self.slices_x - self.TrendOfslices_x
+            self.trend_of_slices_x = trend_datas @ window_pattern
+        de_trended_x = self.slices_x - self.trend_of_slices_x
     
 
         return de_trended_x, trend_datas
@@ -120,7 +120,7 @@ class DataSetMaker:
             temp_pattern = self.base_pattern
 
         plt.plot(temp_pattern,self.slices_x[i],'b-',
-            temp_pattern,self.self.TrendOfslices_x[i],'g--',)
+            temp_pattern,self.self.trend_of_slices_x[i],'g--',)
         plt.legend(['real','trend'])
         plt.title(f'''the {i}-th slice ,
     real gap: {self.use_real_gap} ,
