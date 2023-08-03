@@ -69,34 +69,58 @@ class DataSetMaker:
 
         if use_weights:
             weight = temperature / (temperature - base_pattern * window_len)
-        else:
-            weight = np.ones(window_len)
 
-        if use_real_gap:
-            trend_datas = np.zeros([sample_len, poly_degree])
-            self.trend_of_slices_x = np.zeros_like(self.slices_x)
+            if use_real_gap:
+                trend_datas = np.zeros([sample_len, poly_degree])
+                trend_of_slices_x = np.zeros_like(self.slices_x)
 
-            for i in range(sample_len):
-                temp_weight = np.diag(weight[i])
+                for i in range(sample_len):
+                    temp_weight = np.diag(weight[i])
+                    moment_estimate_matrix = np.dot(
+                        window_pattern[i].T,
+                        np.linalg.inv(window_pattern[i] @ temp_weight @ window_pattern[i].T)
+                    )
+
+                    trend_datas[i] = self.slices_x[i] @ temp_weight @ moment_estimate_matrix
+                    trend_of_slices_x[i] = trend_datas[i] @ window_pattern[i]
+
+            else:
+                temp_weight = np.diag(weight)
+                
                 moment_estimate_matrix = np.dot(
-                    window_pattern[i].T,
-                    np.linalg.inv(window_pattern[i] @ temp_weight @ window_pattern[i].T)
+                    window_pattern.T,
+                    np.linalg.inv(window_pattern @ temp_weight @ window_pattern.T)
                 )
 
-                trend_datas[i] = self.slices_x[i] @ temp_weight @ moment_estimate_matrix
-                self.trend_of_slices_x[i] = trend_datas[i] @ window_pattern[i]
+                trend_datas = self.slices_x @ temp_weight @ moment_estimate_matrix
 
+                trend_of_slices_x = trend_datas @ window_pattern
+                
         else:
-            temp_weight = np.diag(weight)
-            moment_estimate_matrix = np.dot(
-                window_pattern.T,
-                np.linalg.inv(window_pattern @ temp_weight @ window_pattern.T)
-            )
+            if use_real_gap:
+                trend_datas = np.zeros([sample_len, poly_degree])
+                trend_of_slices_x = np.zeros_like(self.slices_x)
 
-            trend_datas = self.slices_x @ temp_weight @ moment_estimate_matrix
+                for i in range(sample_len):
+                    moment_estimate_matrix = np.dot(
+                        window_pattern[i].T,
+                        np.linalg.inv(window_pattern[i] @ window_pattern[i].T)
+                    )
 
-            self.trend_of_slices_x = trend_datas @ window_pattern
-        de_trended_x = self.slices_x - self.trend_of_slices_x
+                    trend_datas[i] = self.slices_x[i] @ moment_estimate_matrix
+                    trend_of_slices_x[i] = trend_datas[i] @ window_pattern[i]
+
+            else:
+                moment_estimate_matrix = np.dot(
+                    window_pattern.T,
+                    np.linalg.inv(window_pattern @ window_pattern.T)
+                )
+
+                trend_datas = self.slices_x @ moment_estimate_matrix
+
+                trend_of_slices_x = trend_datas @ window_pattern
+                
+        de_trended_x = self.slices_x - trend_of_slices_x
 
         return de_trended_x, trend_datas
 
@@ -106,21 +130,4 @@ class DataSetMaker:
         index_month = (self.embed_date.dt.month - 1).to_numpy()
         index_weekday = self.embed_date.dt.weekday.to_numpy()
         return index_month, index_weekday
-
-    def takeALook(
-            self,
-            i=0,
-    ):
-        if self.use_real_gap:
-            temp_pattern = self.base_pattern[i]
-        else:
-            temp_pattern = self.base_pattern
-
-        plt.plot(temp_pattern, self.slices_x[i], 'b-',
-                 temp_pattern, self.self.trend_of_slices_x[i], 'g--', )
-        plt.legend(['real', 'trend'])
-        plt.title(f'''the {i}-th slice ,
-    real gap: {self.use_real_gap} ,
-    weighted: {self.use_weights} .''')
-
-    plt.show()
+        
