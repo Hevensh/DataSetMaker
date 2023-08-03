@@ -70,7 +70,7 @@ class DataSetMaker:
         if use_weights:
             weight = temperature / (temperature - base_pattern * window_len)
         else:
-            weight = np.eye(window_len)
+            weight = np.ones(window_len)
 
         if use_real_gap:
             trend_datas = np.zeros([sample_len, poly_degree])
