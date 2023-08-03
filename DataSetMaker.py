@@ -10,41 +10,41 @@ class DataSetMaker:
         self.date_series = date_series
         ns2day = 24 * 60 * 60 * 1e9
 
-        self.seriesX = figure_series
-        self.seriesDate = np.double(date_series) / ns2day        
+        self.series_x = figure_series
+        self.series_date = np.double(date_series) / ns2day        
     
-    def MakeSlices(
+    def makeSlices(
         self,
         window_len=32,
     ):
         self.window_len = window_len
-        self.embedDate = self.date_series[window_len - 1:]
+        self.embed_date = self.date_series[window_len - 1:]
         
-        data_len = self.seriesX.shape[0]
+        data_len = self.series_x.shape[0]
     
         sample_len = data_len - window_len + 1
         self.sample_len = sample_len
     
-        self.slicesX = np.zeros([sample_len, window_len])
-        self.slicesDate = np.zeros([sample_len, window_len])
+        self.slices_x = np.zeros([sample_len, window_len])
+        self.slices_date = np.zeros([sample_len, window_len])
     
         for i in range(window_len):
-            self.slicesX[:, i] = self.seriesX[i:i + sample_len]
-            self.slicesDate[:, i] = self.seriesDate[i:i + sample_len]
-        self.slicesDate -= self.slicesDate[:, -1:]
+            self.slices_x[:, i] = self.series_x[i:i + sample_len]
+            self.slices_date[:, i] = self.series_date[i:i + sample_len]
+        self.slices_date -= self.slices_date[:, -1:]
 
-        return self.slicesX, self.slicesDate
+        return self.slices_x, self.slices_date
 
 
-    def Detrend(
+    def detrend(
         self,
-        useRealGap=True,
-        useWeights=True,
+        use_real_gap=True,
+        use_weights=True,
         temperature=77,  # higher the tempe, lower the effect of weight
         degree=2,
     ):
-        self.useRealGap = useRealGap
-        self.useWeights = useWeights
+        self.use_real_gap = use_real_gap
+        self.use_weights = use_weights
     
         self.temperature = temperature
         self.degree = degree
@@ -53,8 +53,8 @@ class DataSetMaker:
         sample_len = self.sample_len
         window_len = self.window_len
     
-        if useRealGap:
-            base_pattern = self.slicesDate / window_len
+        if use_real_gap:
+            base_pattern = self.slices_date / window_len
     
             window_pattern = np.zeros([sample_len, poly_degree, window_len])
             for i in range(poly_degree):
@@ -67,14 +67,14 @@ class DataSetMaker:
             for i in range(poly_degree):
                 window_pattern[i] = base_pattern ** i
     
-        if useWeights:
+        if use_weights:
             weight = temperature / (temperature - base_pattern * window_len)
         else:
             weight = np.eye(window_len)
     
-        if useRealGap:
-            TrendDatas = np.zeros([sample_len, poly_degree])
-            self.TrendOfSlicesX = np.zeros_like(self.slicesX)
+        if use_real_gap:
+            trend_datas = np.zeros([sample_len, poly_degree])
+            self.TrendOfslices_x = np.zeros_like(self.slices_x)
     
             for i in range(sample_len):
                 tempWeight = np.diag(weight[i])
@@ -83,8 +83,8 @@ class DataSetMaker:
                     np.linalg.inv(window_pattern[i] @ tempWeight @ window_pattern[i].T)
                 )
 
-                TrendDatas[i] = self.slicesX[i] @ tempWeight @ moment_estimate_matrix
-                self.TrendOfSlicesX[i] = TrendDatas[i] @ window_pattern[i]
+                trend_datas[i] = self.slices_x[i] @ tempWeight @ moment_estimate_matrix
+                self.TrendOfslices_x[i] = trend_datas[i] @ window_pattern[i]
     
         else:
             tempWeight = np.diag(weight)
@@ -93,32 +93,32 @@ class DataSetMaker:
                 np.linalg.inv(window_pattern @ tempWeight @ window_pattern.T)
             )
     
-            TrendDatas = self.slicesX @ tempWeight @ moment_estimate_matrix
+            trend_datas = self.slices_x @ tempWeight @ moment_estimate_matrix
     
-            self.TrendOfSlicesX = TrendDatas @ window_pattern
-        deTrendedX = self.slicesX - self.TrendOfSlicesX
+            self.TrendOfslices_x = trend_datas @ window_pattern
+        de_trended_x = self.slices_x - self.TrendOfslices_x
     
 
-        return deTrendedX, TrendDatas
+        return de_trended_x, trend_datas
 
     
-    def IndexDate(
+    def indexDate(
         self,
     ):
-        indexMonth = (self.embedDate.dt.month-1).to_numpy()
-        indexWeekday = (self.embedDate.dt.weekday).to_numpy()
-        return indexMonth, indexWeekday
+        index_month = (self.embed_date.dt.month-1).to_numpy()
+        index_weekday = (self.embed_date.dt.weekday).to_numpy()
+        return index_month, index_weekday
 
     
-    def TakeALook(
+    def takeALook(
         self,
         i = 0,
     ):
-        plt.plot(tempPattern,self.slicesX[i],'b-',
-            tempPattern,self.self.TrendOfSlicesX[i],'g--',)
+        plt.plot(tempPattern,self.slices_x[i],'b-',
+            tempPattern,self.self.TrendOfslices_x[i],'g--',)
         plt.legend(['real','trend'])
         plt.title(f'''the {i}-th slice ,
-    real gap: {self.useRealGap} ,
-    weighted: {self.useWeights} .''')
+    real gap: {self.use_real_gap} ,
+    weighted: {self.use_weights} .''')
     plt.show()
         
