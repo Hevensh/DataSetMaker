@@ -131,5 +131,5 @@ class DataSetMaker:
         plt.title(f'''the {i}-th slice ,
     real gap: {self.useRealGap} ,
     weighted: {self.useWeights} .''')
-        plt.show()
+    plt.show()
         
