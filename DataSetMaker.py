@@ -3,25 +3,23 @@ import matplotlib.pyplot as plt
 
 class DataSetMaker:
     def __init__(
-            self,
-            figure_series,
-            date_series,
-            window_len=32,
+        self,
+        figure_series,
+        date_series,
     ):
         self.date_series = date_series
-        self.window_len = window_len
         ns2day = 24 * 60 * 60 * 1e9
 
         self.seriesX = figure_series
-        self.seriesDate = np.double(date_series) / ns2day
-
-        self.embedDate = self.date_series[window_len - 1:]
-        
+        self.seriesDate = np.double(date_series) / ns2day        
     
     def MakeSlices(
-            self,
+        self,
+        window_len=32,
     ):
-        window_len = self.window_len
+        self.window_len = window_len
+        self.embedDate = self.date_series[window_len - 1:]
+        
         data_len = self.seriesX.shape[0]
     
         sample_len = data_len - window_len + 1
@@ -41,11 +39,11 @@ class DataSetMaker:
 
 
     def Detrend(
-            self,
-            useRealGap=True,
-            useWeights=True,
-            temperature=77,  # higher the tempe, lower the effect of weight
-            degree=2,
+        self,
+        useRealGap=True,
+        useWeights=True,
+        temperature=77,  # higher the tempe, lower the effect of weight
+        degree=2,
     ):
         self.useRealGap = useRealGap
         self.useWeights = useWeights
