@@ -25,17 +25,15 @@ class DataSetMaker:
         sample_len = data_len - window_len + 1
         self.sample_len = sample_len
     
-        slicesX = np.zeros([sample_len, window_len])
-        slicesDate = np.zeros([sample_len, window_len])
+        self.slicesX = np.zeros([sample_len, window_len])
+        self.slicesDate = np.zeros([sample_len, window_len])
     
         for i in range(window_len):
-            slicesX[:, i] = self.seriesX[i:i + sample_len]
-            slicesDate[:, i] = self.seriesDate[i:i + sample_len]
+            self.slicesX[:, i] = self.seriesX[i:i + sample_len]
+            self.slicesDate[:, i] = self.seriesDate[i:i + sample_len]
         slicesDate -= slicesDate[:, -1:]
-    
-        self.slicesX = slicesX
-        self.slicesDate = slicesDate
-        return slicesX, slicesDate
+
+        return self.slicesX, self.slicesDate
 
 
     def Detrend(
@@ -76,7 +74,7 @@ class DataSetMaker:
     
         if useRealGap:
             TrendDatas = np.zeros([sample_len, poly_degree])
-            TrendOfSlicesX = np.zeros_like(self.slicesX)
+            self.TrendOfSlicesX = np.zeros_like(self.slicesX)
     
             for i in range(sample_len):
                 tempWeight = np.diag(weight[i])
@@ -85,8 +83,8 @@ class DataSetMaker:
                     np.linalg.inv(window_pattern[i] @ tempWeight @ window_pattern[i].T)
                 )
 
-                TrendDatas[i] = slicesX[i] @ tempWeight @ moment_estimate_matrix
-                TrendOfSlicesX[i] = TrendDatas[i] @ window_pattern[i]
+                TrendDatas[i] = self.slicesX[i] @ tempWeight @ moment_estimate_matrix
+                self.TrendOfSlicesX[i] = TrendDatas[i] @ window_pattern[i]
     
         else:
             tempWeight = np.diag(weight)
@@ -95,14 +93,12 @@ class DataSetMaker:
                 np.linalg.inv(window_pattern @ tempWeight @ window_pattern.T)
             )
     
-            TrendDatas = slicesX @ tempWeight @ moment_estimate_matrix
+            TrendDatas = self.slicesX @ tempWeight @ moment_estimate_matrix
     
-            TrendOfSlicesX = TrendDatas @ window_pattern
-        deTrendedX = slicesX - TrendOfSlicesX
+            self.TrendOfSlicesX = TrendDatas @ window_pattern
+        deTrendedX = self.slicesX - self.TrendOfSlicesX
     
-        self.base_pattern = base_pattern
-        self.TrendDatas = TrendDatas
-        self.TrendOfSlicesX = TrendOfSlicesX
+
         return deTrendedX, TrendDatas
 
     
@@ -118,13 +114,8 @@ class DataSetMaker:
         self,
         i = 0,
     ):
-        if self.useRealGap:
-            tempPattern = self.base_pattern[i]
-        else:
-            tempPattern = self.base_pattern
-    
         plt.plot(tempPattern,self.slicesX[i],'b-',
-            tempPattern,self.TrendOfSlicesX[i],'g--',)
+            tempPattern,self.self.TrendOfSlicesX[i],'g--',)
         plt.legend(['real','trend'])
         plt.title(f'''the {i}-th slice ,
     real gap: {self.useRealGap} ,
