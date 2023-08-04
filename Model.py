@@ -3,6 +3,8 @@ from DataSetMaker.Layer import StockLoRA
 
 def makeModel(
         total_used_stock,
+        window_len,
+        degree,
         dim_latent = 16,
         dim_embedM = 4,
         dim_embedW = 4,
