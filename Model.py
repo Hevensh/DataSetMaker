@@ -1,5 +1,5 @@
 from tensorflow.keras import Input, Sequential, Model, layers
-from DataSetMaker.Layer import stockLoRA
+from DataSetMaker.Layer import StockLoRA
 
 def makeModel(
         total_used_stock,
@@ -60,7 +60,7 @@ def makeModel(
     ],name='trand_decoder')
 
     inputStock = Input(shape=(),name='stock_index')
-    LoRAStock = stockLoRA(total_used_stock,dim_latent,rankS,name='stock_LoRA')
+    LoRAStock = StockLoRA(total_used_stock,dim_latent,rankS,name='stock_LoRA')
     adapted_latent = layers.Add(name='after_LoRA')([latent,trendDecoder(latent),LoRAStock(latent,inputStock),series_latent])
 
     outputTrend = layers.Dense(3,name='score')(adapted_latent)
