@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Model, layers
 
-class stockLoRA(Model):
+class StockLoRA(Model):
     def __init__(
         self,
         num_stocks,
