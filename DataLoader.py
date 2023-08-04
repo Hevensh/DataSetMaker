@@ -72,13 +72,13 @@ class DataLoader:
     def loadTheData(
             self,
             file_list,
+            last_day='2018-1-1',  # the train data is before the last day
+        
             pre_process_fun=ilocSeries,
             # fun need to return:
             # seriesDate (numpy type)
             # series_list (numpy type)
             # date_list
-
-            last_day='2018-1-1',  # the train data is before the last day
     ):
         ns2day = 24 * 60 * 60 * 1e9
         self.train_last_day = np.double(pd.Timestamp(last_day).to_numpy()) / ns2day
