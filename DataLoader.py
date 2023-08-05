@@ -263,7 +263,8 @@ class DataLoader:
         targets_val = tf.stack(self.val_trend, 0)
 
         u, c = np.unique(targets_train, return_counts=True)
-v        print(f'training target has:')
+        c_per = np.round(c / c.sum() * 100,2)
+        print(f'training target has:')
         print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum()}%')
         for i in range(1,len(c_per)):
             print(f'\ttype {i}: {c[i]} samples, {c_per[i]}%')
