@@ -266,14 +266,14 @@ class DataLoader:
         c_per = np.int8(c / c.sum() * 100)
         print(f'training target has:')
         print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum()}%')
-        for i in range(len(c_per)):
+        for i in range(1,len(c_per)):
             print(f'\ttype {i}: {c[i]} samples, {c_per[i]}%')
 
         u, c = np.unique(targets_val, return_counts=True)
         c_per = np.int8(c / c.sum() * 100)
         print(f'validation target has:')
         print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum()}%')
-        for i in range(len(c_per)):
+        for i in range(1,len(c_per)):
             print(f'\ttype {i}: {c[i]} samples, {c_per[i]}%')
             
         return inputs_train, targets_train, inputs_val, targets_val
