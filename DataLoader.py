@@ -208,9 +208,9 @@ class DataLoader:
                 self.train_W[pos] = index_weekday[left:right]
                 self.train_S[pos] = chosen
 
-                B1 = trend_datas[left + self.pred_days:right + self.pred_days, 1] > 0
-                B2 = trend_datas[left + self.pred_days:right + self.pred_days, 2] > 0
-                self.train_trend[pos] = B1 * 1 + ~B2 * 2
+                self.train_trend[pos] = np.zeros_like(trend_datas[left + self.pred_days:right + self.pred_days, 0])
+                for i in range(degree):
+                    self.train_trend[pos] += (trend_datas[left + self.pred_days:right + self.pred_days, i+1] > 0)*2**i
 
                 left = self.feasible_train_len[chosen]
                 right = self.feasible_train_len[chosen] + self.valMin - self.pred_days
@@ -220,9 +220,10 @@ class DataLoader:
                 self.val_W[chosen] = index_weekday[left:right]
                 self.val_S[chosen] = chosen
 
-                B1 = trend_datas[left + self.pred_days:right + self.pred_days, 1] > 0
-                B2 = trend_datas[left + self.pred_days:right + self.pred_days, 2] > 0
-                self.val_trend[chosen] = B1 * 1 + ~B2 * 2
+                self.val_trend[pos] = np.zeros_like(trend_datas[left + self.pred_days:right + self.pred_days, 0])
+                for i in range(degree):
+                    self.val_trend[pos] += (trend_datas[left + self.pred_days:right + self.pred_days, i+1] > 0)*2**i
+
 
                 end = time.time()
                 count_segmenting += end - start
