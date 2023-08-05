@@ -65,7 +65,7 @@ def makeModel(
     LoRAStock = StockLoRA(total_used_stock,dim_latent,rankS,name='stock_LoRA')
     adapted_latent = layers.Add(name='after_LoRA')([latent,trendDecoder(latent),LoRAStock(latent,inputStock),series_latent])
 
-    outputTrend = layers.Dense(3,name='score')(adapted_latent)
+    outputTrend = layers.Dense(4,name='score')(adapted_latent)
 
     MyModel = Model((inputEt,inputBetaRest,
                      inputMonth,inputWeekday,inputStock),
