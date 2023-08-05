@@ -210,9 +210,7 @@ class DataLoader:
 
                 B1 = trend_datas[left + self.pred_days:right + self.pred_days, 1] > 0
                 B2 = trend_datas[left + self.pred_days:right + self.pred_days, 2] > 0
-                self.train_trend[pos] = (
-                        B1 * 1 + ~B2 * 2
-                )
+                self.train_trend[pos] = B1 * 1 + ~B2 * 2
 
                 left = self.feasible_train_len[chosen]
                 right = self.feasible_train_len[chosen] + self.valMin - self.pred_days
@@ -267,14 +265,14 @@ class DataLoader:
         u, c = np.unique(targets_train, return_counts=True)
         c_per = np.int8(c / c.sum() * 100)
         print(f'training target has:')
-        print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum(}%')
+        print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum()}%')
         for i in range(targets_val.shape[-1]):
             print(f'\ttype {i}: {c[1]} samples, {c_per[1]}%')
 
         u, c = np.unique(targets_val, return_counts=True)
         c_per = np.int8(c / c.sum() * 100)
         print(f'validation target has:')
-        print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum(}%')
+        print(f'\ttype 0: {c[0]} samples, {100 - c_per[1:].sum()}%')
         for i in range(targets_val.shape[-1]):
             print(f'\ttype {i}: {c[1]} samples, {c_per[1]}%')
             
