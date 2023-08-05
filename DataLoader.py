@@ -20,8 +20,7 @@ def poltRateOfProcess(k, total, time, process='processing', filename='file', sev
                                  f'{int(time[i])}s {int(time[i] * 1e3 / c)}ms/' +
                                  filename[i])
             else:
-                the_string[i] = (process[i] + ' is done [' + '=' * current +
-                                 '>' + '-' * (19 - current) + ']' +
+                the_string[i] = (process[i] + ' is done [' + '=' * 20 + ']' +
                                  f' - {c}/{total[i]}  ' +
                                  f'{int(time[i])}s {int(time[i] * 1e3 / c)}ms/' +
                                  filename[i])
