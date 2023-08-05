@@ -220,9 +220,9 @@ class DataLoader:
                 self.val_W[chosen] = index_weekday[left:right]
                 self.val_S[chosen] = chosen
 
-                self.val_trend[pos] = np.zeros_like(trend_datas[left + self.pred_days:right + self.pred_days, 0])
+                self.val_trend[chosen] = np.zeros_like(trend_datas[left + self.pred_days:right + self.pred_days, 0])
                 for i in range(degree):
-                    self.val_trend[pos] += (trend_datas[left + self.pred_days:right + self.pred_days, i+1] > 0)*2**i
+                    self.val_trend[chosen] += (trend_datas[left + self.pred_days:right + self.pred_days, i+1] > 0)*2**i
 
 
                 end = time.time()
