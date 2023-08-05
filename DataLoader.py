@@ -208,9 +208,11 @@ class DataLoader:
                 self.train_W[pos] = index_weekday[left:right]
                 self.train_S[pos] = chosen
 
+                B1 = trend_datas[left + self.pred_days:right + self.pred_days, 1] > 0
+                B2 = trend_datas[left + self.pred_days:right + self.pred_days, 2] > 0
                 self.train_trend[pos] = (
-                        (trend_datas[left + self.pred_days:right + self.pred_days, 1:] > 0).all(axis=-1) * 1 +
-                        (trend_datas[left + self.pred_days:right + self.pred_days, 1:] < 0).all(axis=-1) * 2
+                        (B1 & ~B2) * 1 +
+                        (~B1 & B2) * 2
                 )
 
                 left = self.feasible_train_len[chosen]
@@ -221,9 +223,11 @@ class DataLoader:
                 self.val_W[chosen] = index_weekday[left:right]
                 self.val_S[chosen] = chosen
 
+                B1 = trend_datas[left + self.pred_days:right + self.pred_days, 1] > 0
+                B2 = trend_datas[left + self.pred_days:right + self.pred_days, 2] > 0
                 self.val_trend[chosen] = (
-                        (trend_datas[left + self.pred_days:right + self.pred_days, 1:] > 0).all(axis=-1) * 1 +
-                        (trend_datas[left + self.pred_days:right + self.pred_days, 1:] < 0).all(axis=-1) * 2
+                        (B1 & ~B2) * 1 +
+                        (~B1 & B2) * 2
                 )
 
                 end = time.time()
