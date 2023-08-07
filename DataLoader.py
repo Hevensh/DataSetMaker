@@ -6,6 +6,7 @@ import tensorflow as tf
 from IPython import display
 from DataSetMaker.DataSetMaker import DataSetMaker
 
+
 def poltRateOfProcess(k, total, time, process='processing', filename='file', several=False):
     display.clear_output(wait=True)
     if several:
@@ -72,7 +73,7 @@ class DataLoader:
             self,
             file_list,
             last_day='2018-1-1',  # the train data is before the last day
-        
+
             pre_process_fun=ilocSeries,
             # fun need to return:
             # seriesDate (numpy type)
@@ -150,28 +151,28 @@ class DataLoader:
 
         self.eps = eps
 
-        self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len,])
-        self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len,])
-        self.train_Beta = np.zeros([self.total_segments,self.length_segment, self.degree+1,])
-        self.train_M = np.zeros([self.total_segments, self.length_segment,],np.int32)
-        self.train_W = np.zeros([self.total_segments, self.length_segment,],np.int32)
-        self.train_S = np.zeros([self.total_segments,],np.int32)
+        self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+        self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+        self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+        self.train_S = np.zeros([self.total_segments, ], np.int32)
 
-        self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.window_len,])
-        self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.window_len,])
-        self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree+1,])
-        
+        self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+
         val_len = self.valMin - self.pred_days
-        self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len,])
-        self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len,])
-        self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree+1,])
-        self.val_M = np.zeros([self.total_used_stock, val_len,])
-        self.val_W = np.zeros([self.total_used_stock, val_len,])
-        self.val_S = np.zeros([self.total_used_stock,])
+        self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+        self.val_M = np.zeros([self.total_used_stock, val_len, ])
+        self.val_W = np.zeros([self.total_used_stock, val_len, ])
+        self.val_S = np.zeros([self.total_used_stock, ])
 
-        self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.window_len,])
-        self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.window_len,])
-        self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree+1,])
+        self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
 
         count_slicing = 0
         count_detrending = 0
@@ -205,7 +206,7 @@ class DataLoader:
             index_month, index_weekday = datasetMaker.indexDate()
 
             start = time.time()
-            
+
             left = self.feasible_train_len[chosen]
             right = self.feasible_train_len[chosen] + val_len
             self.val_Yt[chosen] = datasetMaker.slices_x[left:right]
@@ -244,47 +245,46 @@ class DataLoader:
                     ('stock', 'stock', 'segment'), True
                 )
                 pos += 1
-                
 
     def formDatapairs(
             self,
     ):
         inputs_train = (
             tf.cast(self.train_Et, tf.float32),
-            tf.cast(self.train_Beta[:,:,1:], tf.float32),
+            tf.cast(self.train_Beta[:, :, 1:], tf.float32),
             tf.cast(self.train_M, tf.int32),
             tf.cast(self.train_W, tf.int32),
             tf.cast(self.train_S, tf.int32),
         )
-        targets_train = np.zeros_like(self.train_Beta_target[:,:,1], np.int32)
-        for i in range(degree):
+        targets_train = np.zeros_like(self.train_Beta_target[:, :, 1], np.int32)
+        for i in range(self.degree):
             targets_train += (self.train_Beta_target[:, :, i + 1] > 0) * 2 ** i
         targets_train = tf.cast(targets_train, tf.int32)
-        
+
         inputs_val = (
             tf.cast(self.val_Et, tf.float32),
-            tf.cast(self.val_Beta[:,:,1:], tf.float32),
+            tf.cast(self.val_Beta[:, :, 1:], tf.float32),
             tf.cast(self.val_M, tf.int32),
             tf.cast(self.val_W, tf.int32),
             tf.cast(self.val_S, tf.int32),
         )
-        targets_val = np.zeros_like(self.val_Beta_target[:,:,1], np.int32)
-        for i in range(degree):
+        targets_val = np.zeros_like(self.val_Beta_target[:, :, 1], np.int32)
+        for i in range(self.degree):
             targets_val += (self.val_Beta_target[:, :, i + 1] > 0) * 2 ** i
         targets_val = tf.cast(targets_train, tf.int32)
 
         u, c = np.unique(targets_train, return_counts=True)
-        self.train_per = np.round(c / c.sum() * 100,2)
+        self.train_per = np.round(c / c.sum() * 100, 2)
         print(f'training target has:')
-        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.train_per[1:].sum(),2)}%')
-        for i in range(1,len(self.train_per)):
+        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.train_per[1:].sum(), 2)}%')
+        for i in range(1, len(self.train_per)):
             print(f'\ttype {i}: {c[i]} samples, {self.train_per[i]}%')
 
         u, c = np.unique(targets_val, return_counts=True)
-        self.val_per = np.round(c / c.sum() * 100,2)
+        self.val_per = np.round(c / c.sum() * 100, 2)
         print(f'validation target has:')
-        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.val_per[1:].sum(),2)}%')
-        for i in range(1,len(self.val_per)):
+        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.val_per[1:].sum(), 2)}%')
+        for i in range(1, len(self.val_per)):
             print(f'\ttype {i}: {c[i]} samples, {self.val_per[i]}%')
-            
+
         return inputs_train, targets_train, inputs_val, targets_val
