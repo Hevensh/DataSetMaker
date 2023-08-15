@@ -135,6 +135,9 @@ class DataLoader:
                 self.feasible_date[pos] = self.date_list[i]
                 pos += 1
 
+    import time
+    import numpy as np
+
     def processTheData(
             self,
             use_real_gap=True,  # if use real date gap when detrend
@@ -142,37 +145,61 @@ class DataLoader:
             temperature=77,  # higher the tempe, lower the effect of weights
             degree=2,  # the degree of polyfit when detrend
 
+            input_data_type=(False, True, True, True, True),
+            # choose the type of input data (Yt, Et, Beta, Date, Stock) 
+            target_data_type=(False, False, True),
+            # choose the type of target data (Yt, Et, Beta) 
+
             eps=1e-6,
     ):
         self.use_real_gap = use_real_gap
         self.use_weights = use_weights
         self.temperature = temperature
         self.degree = degree
-
+        
+        self.input_data_type = input_data_type
+        self.target_data_type = target_data_type
+        
         self.eps = eps
 
-        self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
-        self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-        self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-        self.train_S = np.zeros([self.total_segments, ], np.int32)
+        if input_data_type[0]:
+            self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if input_data_type[1]:
+            self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if input_data_type[2]:
+            self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+        if input_data_type[3]:
+            self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+            self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+        if input_data_type[4]:
+            self.train_S = np.zeros([self.total_segments, ], np.int32)
 
-        self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+        if target_data_type[0]:
+            self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if target_data_type[1]:
+            self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if target_data_type[2]:
+            self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
 
         val_len = self.valMin - self.pred_days
-        self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
-        self.val_M = np.zeros([self.total_used_stock, val_len, ])
-        self.val_W = np.zeros([self.total_used_stock, val_len, ])
-        self.val_S = np.zeros([self.total_used_stock, ])
+        if input_data_type[0]:
+            self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if input_data_type[1]:
+            self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if input_data_type[2]:
+            self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+        if input_data_type[3]:
+            self.val_M = np.zeros([self.total_used_stock, val_len, ])
+            self.val_W = np.zeros([self.total_used_stock, val_len, ])
+        if input_data_type[4]:
+            self.val_S = np.zeros([self.total_used_stock, ])
 
-        self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+        if target_data_type[0]:
+            self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if target_data_type[1]:
+            self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if target_data_type[2]:
+            self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
 
         count_slicing = 0
         count_detrending = 0
@@ -209,30 +236,46 @@ class DataLoader:
 
             left = self.feasible_train_len[chosen]
             right = self.feasible_train_len[chosen] + val_len
-            self.val_Yt[chosen] = datasetMaker.slices_x[left:right]
-            self.val_Et[chosen] = de_trended_x[left:right]
-            self.val_Beta[chosen] = trend_datas[left:right]
-            self.val_M[chosen] = index_month[left:right]
-            self.val_W[chosen] = index_weekday[left:right]
-            self.val_S[chosen] = chosen
+            if input_data_type[0]:
+                self.val_Yt[chosen] = datasetMaker.slices_x[left:right]
+            if input_data_type[1]:
+                self.val_Et[chosen] = de_trended_x[left:right]
+            if input_data_type[2]:
+                self.val_Beta[chosen] = trend_datas[left:right]
+            if input_data_type[3]:
+                self.val_M[chosen] = index_month[left:right]
+                self.val_W[chosen] = index_weekday[left:right]
+            if input_data_type[4]:
+                self.val_S[chosen] = chosen
 
-            self.val_Yt_target[chosen] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days]
-            self.val_Et_target[chosen] = de_trended_x[left + self.pred_days:right + self.pred_days]
-            self.val_Beta_target[chosen] = trend_datas[left + self.pred_days:right + self.pred_days]
+            if target_data_type[0]:
+                self.val_Yt_target[chosen] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days]
+            if target_data_type[1]:
+                self.val_Et_target[chosen] = de_trended_x[left + self.pred_days:right + self.pred_days]
+            if target_data_type[2]:
+                self.val_Beta_target[chosen] = trend_datas[left + self.pred_days:right + self.pred_days]
 
             for i in range(self.num_segment_each_stock[chosen]):
                 left = self.feasible_train_len[chosen] - self.length_segment * (i + 1)
                 right = self.feasible_train_len[chosen] - self.length_segment * i
-                self.train_Yt[pos] = datasetMaker.slices_x[left:right]
-                self.train_Et[pos] = de_trended_x[left:right]
-                self.train_Beta[pos] = trend_datas[left:right]
-                self.train_M[pos] = index_month[left:right]
-                self.train_W[pos] = index_weekday[left:right]
-                self.train_S[pos] = chosen
+                if input_data_type[0]:
+                    self.train_Yt[pos] = datasetMaker.slices_x[left:right]
+                if input_data_type[1]:
+                    self.train_Et[pos] = de_trended_x[left:right]
+                if input_data_type[2]:
+                    self.train_Beta[pos] = trend_datas[left:right]
+                if input_data_type[3]:
+                    self.train_M[pos] = index_month[left:right]
+                    self.train_W[pos] = index_weekday[left:right]
+                if input_data_type[4]:
+                    self.train_S[pos] = chosen
 
-                self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, -1:]
-                self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days, -1:]
-                self.train_Beta_target[pos] = trend_datas[left + self.pred_days:right + self.pred_days]
+                if target_data_type[0]:
+                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, -1:]
+                if target_data_type[1]:
+                    self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days, -1:]
+                if target_data_type[2]:
+                    self.train_Beta_target[pos] = trend_datas[left + self.pred_days:right + self.pred_days]
 
                 end = time.time()
                 count_segmenting += end - start
@@ -258,7 +301,7 @@ class DataLoader:
         )
         targets_train = np.zeros_like(self.train_Beta_target[:, :, 1], np.int32)
         for i in range(self.degree):
-            targets_train[self.train_Beta_target[:, :, i + 1] > 0] += 2 ** i
+            targets_train += (self.train_Beta_target[:, :, i + 1] > 0) * 2 ** i
         targets_train = tf.cast(targets_train, tf.int32)
 
         inputs_val = (
@@ -270,8 +313,8 @@ class DataLoader:
         )
         targets_val = np.zeros_like(self.val_Beta_target[:, :, 1], np.int32)
         for i in range(self.degree):
-            targets_val[self.val_Beta_target[:, :, i + 1] > 0] += 2 ** i
-        targets_val = tf.cast(targets_val, tf.int32)
+            targets_val += (self.val_Beta_target[:, :, i + 1] > 0) * 2 ** i
+        targets_val = tf.cast(targets_train, tf.int32)
 
         u, c = np.unique(targets_train, return_counts=True)
         self.train_per = np.round(c / c.sum() * 100, 2)
