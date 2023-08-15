@@ -314,7 +314,7 @@ class DataLoader:
         targets_val = np.zeros_like(self.val_Beta_target[:, :, 1], np.int32)
         for i in range(self.degree):
             targets_val += (self.val_Beta_target[:, :, i + 1] > 0) * 2 ** i
-        targets_val = tf.cast(targets_train, tf.int32)
+        targets_val = tf.cast(targets_val, tf.int32)
 
         u, c = np.unique(targets_train, return_counts=True)
         self.train_per = np.round(c / c.sum() * 100, 2)
