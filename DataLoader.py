@@ -271,9 +271,9 @@ class DataLoader:
                     self.train_S[pos] = chosen
 
                 if target_data_type[0]:
-                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, -1:]
+                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days]
                 if target_data_type[1]:
-                    self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days, -1:]
+                    self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days]
                 if target_data_type[2]:
                     self.train_Beta_target[pos] = trend_datas[left + self.pred_days:right + self.pred_days]
 
