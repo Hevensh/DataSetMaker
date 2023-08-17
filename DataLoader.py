@@ -284,9 +284,10 @@ class DataLoader:
 
     def formDatapairs(
             self,
+            eps=1e-6
     ):
         inputs_train = (
-            tf.cast(self.train_Et / self.train_Et.std(axis=-1, keepdims=True), tf.float32),
+            tf.cast(self.train_Et / (self.train_Et.std(axis=-1, keepdims=True) + eps), tf.float32),
             tf.cast(self.train_Beta[:, :, 1:], tf.float32),
             tf.cast(self.train_M, tf.int32),
             tf.cast(self.train_W, tf.int32),
@@ -298,7 +299,7 @@ class DataLoader:
         targets_train = tf.cast(targets_train, tf.int32)
 
         inputs_val = (
-            tf.cast(self.val_Et / self.val_Et.std(axis=-1, keepdims=True), tf.float32),
+            tf.cast(self.val_Et / (self.val_Et.std(axis=-1, keepdims=True) + eps), tf.float32),
             tf.cast(self.val_Beta[:, :, 1:], tf.float32),
             tf.cast(self.val_M, tf.int32),
             tf.cast(self.val_W, tf.int32),
