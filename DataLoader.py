@@ -135,9 +135,6 @@ class DataLoader:
                 self.feasible_date[pos] = self.date_list[i]
                 pos += 1
 
-    import time
-    import numpy as np
-
     def processTheData(
             self,
             use_real_gap=True,  # if use real date gap when detrend
@@ -195,9 +192,9 @@ class DataLoader:
             self.val_S = np.zeros([self.total_used_stock, ])
 
         if target_data_type[0]:
-            self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+            self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.pred_days, ])
         if target_data_type[1]:
-            self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+            self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.pred_days, ])
         if target_data_type[2]:
             self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
 
@@ -249,9 +246,9 @@ class DataLoader:
                 self.val_S[chosen] = chosen
 
             if target_data_type[0]:
-                self.val_Yt_target[chosen] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days]
+                self.val_Yt_target[chosen] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days:]
             if target_data_type[1]:
-                self.val_Et_target[chosen] = de_trended_x[left + self.pred_days:right + self.pred_days]
+                self.val_Et_target[chosen] = de_trended_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days:]
             if target_data_type[2]:
                 self.val_Beta_target[chosen] = trend_datas[left + self.pred_days:right + self.pred_days]
 
@@ -271,9 +268,9 @@ class DataLoader:
                     self.train_S[pos] = chosen
 
                 if target_data_type[0]:
-                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days]
+                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days:]
                 if target_data_type[1]:
-                    self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days]
+                    self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days:]
                 if target_data_type[2]:
                     self.train_Beta_target[pos] = trend_datas[left + self.pred_days:right + self.pred_days]
 
