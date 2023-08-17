@@ -146,8 +146,6 @@ class DataLoader:
             # choose the type of input data (Yt, Et, Beta, Date, Stock) 
             target_data_type=(False, False, True),
             # choose the type of target data (Yt, Et, Beta) 
-
-            eps=1e-6,
     ):
         self.use_real_gap = use_real_gap
         self.use_weights = use_weights
@@ -157,8 +155,6 @@ class DataLoader:
         self.input_data_type = input_data_type
         self.target_data_type = target_data_type
         
-        self.eps = eps
-
         if input_data_type[0]:
             self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
         if input_data_type[1]:
@@ -223,7 +219,7 @@ class DataLoader:
                 temperature=temperature,
                 degree=degree,
             )
-            de_trended_x[pos] /= de_trended_x.std(axis=0) + eps
+
             end = time.time()
             count_detrending += end - start
 
