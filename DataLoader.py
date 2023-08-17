@@ -172,9 +172,9 @@ class DataLoader:
             self.train_S = np.zeros([self.total_segments, ], np.int32)
 
         if target_data_type[0]:
-            self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+            self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.pred_days, ])
         if target_data_type[1]:
-            self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+            self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.pred_days, ])
         if target_data_type[2]:
             self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
 
