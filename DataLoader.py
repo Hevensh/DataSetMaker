@@ -63,9 +63,9 @@ def ilocSeries(data0):
 class DataLoader:
     def __init__(
             self,
-            process_bar=True,
+            process_info=True,
     ):
-        self.process_bar = process_bar
+        self.process_info = process_info
         
     def loadTheData(
             self,
@@ -96,7 +96,7 @@ class DataLoader:
             self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
             self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
 
-            if self.process_bar:
+            if self.process_info:
                 end = time.time()
                 poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
 
@@ -125,7 +125,7 @@ class DataLoader:
 
         self.valMin = np.unique(self.feasible_val_len).min() - self.pred_days
 
-        if self.process_bar:
+        if self.process_info:
             print(f'{self.total_segments} segments from {self.total_used_stock} feasible stocks,')
             print(f'each segment has {self.length_segment} samples pairs.')
             print(f'validation for each stock has {self.valMin} samples pairs.')
@@ -278,7 +278,7 @@ class DataLoader:
                 end = time.time()
                 count_segmenting += end - start
 
-                if self.process_bar:
+                if self.process_info:
                     if input_data_type[1:3].count(True) + target_data_type[1:].count(True):
                         poltRateOfProcess(
                             (chosen, chosen, pos),
@@ -325,7 +325,7 @@ class DataLoader:
             targets_val += (self.val_Beta_target[:, :, i + 1] > 0) * 2 ** i
         targets_val = tf.cast(targets_val, tf.int32)
 
-        if self.process_bar:
+        if self.process_info:
             u, c = np.unique(targets_train, return_counts=True)
             self.train_per = np.round(c / c.sum() * 100, 2)
             print(f'training target has:')
