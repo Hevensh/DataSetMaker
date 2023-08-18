@@ -159,48 +159,44 @@ class DataLoader:
         
         if input_data_type[0]:
             self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if input_data_type[1]:
+            self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+        if input_data_type[2]:
+            self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+        if input_data_type[3]:
+            self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+            self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+        if input_data_type[4]:
+            self.train_S = np.zeros([self.total_segments, ], np.int32)
+
         if target_data_type[0]:
             self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
+        if target_data_type[1]:
+            self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
+        if target_data_type[2]:
+            self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
 
         if input_data_type[0]:
             self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if input_data_type[1]:
+            self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+        if input_data_type[2]:
+            self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+        if input_data_type[3]:
+            self.val_M = np.zeros([self.total_used_stock, val_len, ])
+            self.val_W = np.zeros([self.total_used_stock, val_len, ])
+        if input_data_type[4]:
+            self.val_S = np.zeros([self.total_used_stock, ])
+    
         if target_data_type[0]:
             self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
-
-        if input_data_type[1:].count(True) + target_data_type[1:].count(True):
-            if input_data_type[1]:
-                self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-            if input_data_type[2]:
-                self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
-            if input_data_type[3]:
-                self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-                self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-            if input_data_type[4]:
-                self.train_S = np.zeros([self.total_segments, ], np.int32)
-    
-            if target_data_type[1]:
-                self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
-            if target_data_type[2]:
-                self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
-    
-            if input_data_type[1]:
-                self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-            if input_data_type[2]:
-                self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
-            if input_data_type[3]:
-                self.val_M = np.zeros([self.total_used_stock, val_len, ])
-                self.val_W = np.zeros([self.total_used_stock, val_len, ])
-            if input_data_type[4]:
-                self.val_S = np.zeros([self.total_used_stock, ])
-    
-            if target_data_type[1]:
-                self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
-            if target_data_type[2]:
-                self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
-                
-            count_detrending = 0
-
+        if target_data_type[1]:
+            self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
+        if target_data_type[2]:
+            self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+            
         count_slicing = 0
+        count_detrending = 0
         count_segmenting = 0
 
         pos = 0
@@ -211,43 +207,42 @@ class DataLoader:
                 self.feasible_series[chosen],
                 self.feasible_date[chosen],
             )
-            _, _ = datasetMaker.makeSlices(
+            slices_x = datasetMaker.makeSlices(
                 window_len=self.window_len,
             )
             end = time.time()
             count_slicing += end - start
 
-            start = time.time()
-            de_trended_x, trend_datas = datasetMaker.detrend(
-                use_real_gap=use_real_gap,
-                use_weights=use_weights,
-                temperature=temperature,
-                degree=degree,
-            )
-
-            end = time.time()
-            count_detrending += end - start
-
-            index_month, index_weekday = datasetMaker.indexDate()
+            if input_data_type[1:3].count(True) + target_data_type[1:].count(True):
+                start = time.time()
+                de_trended_x, trend_datas = datasetMaker.detrend(
+                    use_real_gap=use_real_gap,
+                    use_weights=use_weights,
+                    temperature=temperature,
+                    degree=degree,
+                )
+                end = time.time()
+                count_detrending += end - start
 
             start = time.time()
 
             left = self.feasible_train_len[chosen]
             right = self.feasible_train_len[chosen] + val_len
             if input_data_type[0]:
-                self.val_Yt[chosen] = datasetMaker.slices_x[left:right]
+                self.val_Yt[chosen] = slices_x[left:right]
             if input_data_type[1]:
                 self.val_Et[chosen] = de_trended_x[left:right]
             if input_data_type[2]:
                 self.val_Beta[chosen] = trend_datas[left:right]
             if input_data_type[3]:
+                index_month, index_weekday = datasetMaker.indexDate()
                 self.val_M[chosen] = index_month[left:right]
                 self.val_W[chosen] = index_weekday[left:right]
             if input_data_type[4]:
                 self.val_S[chosen] = chosen
 
             if target_data_type[0]:
-                self.val_Yt_target[chosen] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
+                self.val_Yt_target[chosen] = slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
             if target_data_type[1]:
                 self.val_Et_target[chosen] = de_trended_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
             if target_data_type[2]:
@@ -257,7 +252,7 @@ class DataLoader:
                 left = self.feasible_train_len[chosen] - self.length_segment * (i + 1)
                 right = self.feasible_train_len[chosen] - self.length_segment * i
                 if input_data_type[0]:
-                    self.train_Yt[pos] = datasetMaker.slices_x[left:right]
+                    self.train_Yt[pos] = slices_x[left:right]
                 if input_data_type[1]:
                     self.train_Et[pos] = de_trended_x[left:right]
                 if input_data_type[2]:
@@ -269,7 +264,7 @@ class DataLoader:
                     self.train_S[pos] = chosen
 
                 if target_data_type[0]:
-                    self.train_Yt_target[pos] = datasetMaker.slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
+                    self.train_Yt_target[pos] = slices_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
                 if target_data_type[1]:
                     self.train_Et_target[pos] = de_trended_x[left + self.pred_days:right + self.pred_days, self.window_len - self.pred_days - 1:]
                 if target_data_type[2]:
