@@ -63,11 +63,7 @@ def ilocSeries(data0):
 class DataLoader:
     def __init__(
             self,
-            window_len: int = 32,  # window length for segment
-            pred_days: int = 16,  # predict length for segment
     ):
-        self.window_len = window_len
-        self.pred_days = pred_days
 
     def loadTheData(
             self,
@@ -96,24 +92,29 @@ class DataLoader:
             self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
 
             self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
-            self.val_length[chosen] = (self.seriesDate.shape[0] -
-                                       self.train_length[chosen] - self.pred_days)
+            self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
 
             end = time.time()
             poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
 
     def chooseFeasibleData(
             self,
+            window_len: int = 32,  # window length for segment
+            pred_days: int = 16,  # predict length for segment
+
             min_num_segment=1,  # the min num of segments can be sliced in one stock
             length_segment=2000,  # the length of each segment
     ):
+        self.window_len = window_len
+        self.pred_days = pred_days
+        
         self.min_num_segment = min_num_segment
         self.length_segment = length_segment
 
         self.feasible_index = self.train_length > (length_segment * min_num_segment + self.window_len)
 
         self.feasible_train_len = self.train_length[self.feasible_index] - self.window_len + 1
-        self.feasible_val_len = self.val_length[self.feasible_index]
+        self.feasible_val_len = self.val_length[self.feasible_index] - self.pred_days
 
         self.num_segment_each_stock = self.feasible_train_len // length_segment
         self.total_used_stock = self.num_segment_each_stock.shape[0]
