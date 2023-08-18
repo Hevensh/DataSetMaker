@@ -108,6 +108,7 @@ class DataLoader:
             min_num_segment=1,  # the min num of segments can be sliced in one stock
             length_segment=2000,  # the length of each segment
     ):
+        assert window_len >= pred_days
         self.window_len = window_len
         self.pred_days = pred_days
         
