@@ -63,8 +63,10 @@ def ilocSeries(data0):
 class DataLoader:
     def __init__(
             self,
+            process_bar=True,
     ):
-
+        self.process_bar = process_bar
+        
     def loadTheData(
             self,
             file_list,
@@ -94,8 +96,9 @@ class DataLoader:
             self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
             self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
 
-            end = time.time()
-            poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
+            if self.process_bar:
+                end = time.time()
+                poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
 
     def chooseFeasibleData(
             self,
@@ -122,9 +125,10 @@ class DataLoader:
 
         self.valMin = np.unique(self.feasible_val_len).min() - self.pred_days
 
-        print(f'{self.total_segments} segments from {self.total_used_stock} feasible stocks,')
-        print(f'each segment has {self.length_segment} samples pairs.')
-        print(f'validation for each stock has {self.valMin} samples pairs.')
+        if self.process_bar:
+            print(f'{self.total_segments} segments from {self.total_used_stock} feasible stocks,')
+            print(f'each segment has {self.length_segment} samples pairs.')
+            print(f'validation for each stock has {self.valMin} samples pairs.')
 
         self.feasible_series = [None] * self.total_used_stock
         self.feasible_date = [None] * self.total_used_stock
@@ -273,23 +277,24 @@ class DataLoader:
 
                 end = time.time()
                 count_segmenting += end - start
-                
-                if input_data_type[1:3].count(True) + target_data_type[1:].count(True):
-                    poltRateOfProcess(
-                        (chosen, chosen, pos),
-                        (self.total_used_stock, self.total_used_stock, self.total_segments),
-                        (count_slicing, count_detrending, count_segmenting),
-                        ('slicing', 'detrending', 'segmenting'),
-                        ('stock', 'stock', 'segment'), True
-                    )
-                else:
-                    poltRateOfProcess(
-                        (chosen, pos),
-                        (self.total_used_stock, self.total_segments),
-                        (count_slicing, count_segmenting),
-                        ('slicing', 'segmenting'),
-                        ('stock', 'segment'), True
-                    )
+
+                if self.process_bar:
+                    if input_data_type[1:3].count(True) + target_data_type[1:].count(True):
+                        poltRateOfProcess(
+                            (chosen, chosen, pos),
+                            (self.total_used_stock, self.total_used_stock, self.total_segments),
+                            (count_slicing, count_detrending, count_segmenting),
+                            ('slicing', 'detrending', 'segmenting'),
+                            ('stock', 'stock', 'segment'), True
+                        )
+                    else:
+                        poltRateOfProcess(
+                            (chosen, pos),
+                            (self.total_used_stock, self.total_segments),
+                            (count_slicing, count_segmenting),
+                            ('slicing', 'segmenting'),
+                            ('stock', 'segment'), True
+                        )
                 pos += 1
 
     def formDatapairs(
@@ -320,18 +325,19 @@ class DataLoader:
             targets_val += (self.val_Beta_target[:, :, i + 1] > 0) * 2 ** i
         targets_val = tf.cast(targets_val, tf.int32)
 
-        u, c = np.unique(targets_train, return_counts=True)
-        self.train_per = np.round(c / c.sum() * 100, 2)
-        print(f'training target has:')
-        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.train_per[1:].sum(), 2)}%')
-        for i in range(1, len(self.train_per)):
-            print(f'\ttype {i}: {c[i]} samples, {self.train_per[i]}%')
-
-        u, c = np.unique(targets_val, return_counts=True)
-        self.val_per = np.round(c / c.sum() * 100, 2)
-        print(f'validation target has:')
-        print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.val_per[1:].sum(), 2)}%')
-        for i in range(1, len(self.val_per)):
-            print(f'\ttype {i}: {c[i]} samples, {self.val_per[i]}%')
+        if self.process_bar:
+            u, c = np.unique(targets_train, return_counts=True)
+            self.train_per = np.round(c / c.sum() * 100, 2)
+            print(f'training target has:')
+            print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.train_per[1:].sum(), 2)}%')
+            for i in range(1, len(self.train_per)):
+                print(f'\ttype {i}: {c[i]} samples, {self.train_per[i]}%')
+    
+            u, c = np.unique(targets_val, return_counts=True)
+            self.val_per = np.round(c / c.sum() * 100, 2)
+            print(f'validation target has:')
+            print(f'\ttype 0: {c[0]} samples, {np.round(100 - self.val_per[1:].sum(), 2)}%')
+            for i in range(1, len(self.val_per)):
+                print(f'\ttype {i}: {c[i]} samples, {self.val_per[i]}%')
 
         return inputs_train, targets_train, inputs_val, targets_val
