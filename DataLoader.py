@@ -155,47 +155,52 @@ class DataLoader:
         self.input_data_type = input_data_type
         self.target_data_type = target_data_type
         
+        val_len = self.valMin - self.pred_days
+        
         if input_data_type[0]:
             self.train_Yt = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        if input_data_type[1]:
-            self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
-        if input_data_type[2]:
-            self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
-        if input_data_type[3]:
-            self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-            self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
-        if input_data_type[4]:
-            self.train_S = np.zeros([self.total_segments, ], np.int32)
-
         if target_data_type[0]:
             self.train_Yt_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
-        if target_data_type[1]:
-            self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
-        if target_data_type[2]:
-            self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
 
-        val_len = self.valMin - self.pred_days
         if input_data_type[0]:
             self.val_Yt = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        if input_data_type[1]:
-            self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
-        if input_data_type[2]:
-            self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
-        if input_data_type[3]:
-            self.val_M = np.zeros([self.total_used_stock, val_len, ])
-            self.val_W = np.zeros([self.total_used_stock, val_len, ])
-        if input_data_type[4]:
-            self.val_S = np.zeros([self.total_used_stock, ])
-
         if target_data_type[0]:
             self.val_Yt_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
-        if target_data_type[1]:
-            self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
-        if target_data_type[2]:
-            self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+
+        if input_data_type[1:].count(True) + target_data_type[1:].count(True):
+            if input_data_type[1]:
+                self.train_Et = np.zeros([self.total_segments, self.length_segment, self.window_len, ])
+            if input_data_type[2]:
+                self.train_Beta = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+            if input_data_type[3]:
+                self.train_M = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+                self.train_W = np.zeros([self.total_segments, self.length_segment, ], np.int32)
+            if input_data_type[4]:
+                self.train_S = np.zeros([self.total_segments, ], np.int32)
+    
+            if target_data_type[1]:
+                self.train_Et_target = np.zeros([self.total_segments, self.length_segment, self.pred_days + 1, ])
+            if target_data_type[2]:
+                self.train_Beta_target = np.zeros([self.total_segments, self.length_segment, self.degree + 1, ])
+    
+            if input_data_type[1]:
+                self.val_Et = np.zeros([self.total_used_stock, val_len, self.window_len, ])
+            if input_data_type[2]:
+                self.val_Beta = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+            if input_data_type[3]:
+                self.val_M = np.zeros([self.total_used_stock, val_len, ])
+                self.val_W = np.zeros([self.total_used_stock, val_len, ])
+            if input_data_type[4]:
+                self.val_S = np.zeros([self.total_used_stock, ])
+    
+            if target_data_type[1]:
+                self.val_Et_target = np.zeros([self.total_used_stock, val_len, self.pred_days + 1, ])
+            if target_data_type[2]:
+                self.val_Beta_target = np.zeros([self.total_used_stock, val_len, self.degree + 1, ])
+                
+            count_detrending = 0
 
         count_slicing = 0
-        count_detrending = 0
         count_segmenting = 0
 
         pos = 0
