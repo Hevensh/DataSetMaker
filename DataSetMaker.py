@@ -34,7 +34,7 @@ class DataSetMaker:
             self.slices_date[:, i] = self.series_date[i:i + sample_len]
         self.slices_date -= self.slices_date[:, -1:]
 
-        return self.slices_x, self.slices_date
+        return self.slices_x
 
     def detrend(
             self,
