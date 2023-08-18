@@ -272,14 +272,23 @@ class DataLoader:
 
                 end = time.time()
                 count_segmenting += end - start
-
-                poltRateOfProcess(
-                    (chosen, chosen, pos),
-                    (self.total_used_stock, self.total_used_stock, self.total_segments),
-                    (count_slicing, count_detrending, count_segmenting),
-                    ('slicing', 'detrending', 'segmenting'),
-                    ('stock', 'stock', 'segment'), True
-                )
+                
+                if input_data_type[1:3].count(True) + target_data_type[1:].count(True):
+                    poltRateOfProcess(
+                        (chosen, chosen, pos),
+                        (self.total_used_stock, self.total_used_stock, self.total_segments),
+                        (count_slicing, count_detrending, count_segmenting),
+                        ('slicing', 'detrending', 'segmenting'),
+                        ('stock', 'stock', 'segment'), True
+                    )
+                else:
+                    poltRateOfProcess(
+                        (chosen, pos),
+                        (self.total_used_stock, self.total_segments),
+                        (count_slicing, count_segmenting),
+                        ('slicing', 'segmenting'),
+                        ('stock', 'segment'), True
+                    )
                 pos += 1
 
     def formDatapairs(
