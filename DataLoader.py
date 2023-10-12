@@ -63,13 +63,16 @@ def ilocSeries(data0):
 class DataLoader:
     def __init__(
             self,
+            file_list,
             process_info=True,
     ):
+        self.file_list = file_list
         self.process_info = process_info
+        self.has_loaded = False
         
     def loadTheData(
             self,
-            file_list,
+            num_load=None, 
             last_day='2018-1-1',  # the train data is before the last day
 
             pre_process_fun=ilocSeries,
@@ -81,24 +84,78 @@ class DataLoader:
         ns2day = 24 * 60 * 60 * 1e9
         self.train_last_day = np.double(pd.Timestamp(last_day).to_numpy()) / ns2day
 
-        self.total_num_stock = len(file_list)
-        self.series_list = [None] * self.total_num_stock
-        self.date_list = [None] * self.total_num_stock
-        self.train_length = np.zeros(self.total_num_stock, np.int32)
-        self.val_length = np.zeros(self.total_num_stock, np.int32)
+        if num_load is None:
+            num_load = len(self.file_list)
+        else:
+            assert num_load <= len(self.file_list)
 
-        start = time.time()
-        for chosen in range(self.total_num_stock):
-            data0 = pd.read_csv(file_list[chosen])
+        if self.has_loaded:
+            if self.total_num_stock == num_load:
+                print('already loaded')
+            else:
+                if self.total_num_stock > num_load:
+                    start = time.time()
+                    
+                    self.series_list = self.series_list[:num_load]
+                    self.date_list = self.date_list[:num_load]
+                    self.train_length = self.train_length[:num_load]
+                    self.val_length = self.val_length[:num_load]
+    
+                    if self.process_info:
+                        end = time.time()              
+                        poltRateOfProcess(num_load - 1, num_load, end - start, 'reloading')
+                else:
+                    start = time.time()
+                    
+                    temp_series_list = self.series_list
+                    temp_date_list = self.date_list
+                    temp_train_length = self.train_length
+                    temp_val_length = self.val_length
 
-            self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
+                    self.series_list = [None] * num_load
+                    self.date_list = [None] * num_load
+                    self.train_length = np.zeros(num_load, np.int32)
+                    self.val_length = np.zeros(num_load, np.int32)
+            
+                    self.series_list[:self.total_num_stock] = temp_series_list
+                    self.date_list[:self.total_num_stock] = temp_date_list
+                    self.train_length[:self.total_num_stock] = temp_train_length
+                    self.val_length[:self.total_num_stock] = temp_val_length
+            
+                    for chosen in range(num_load):
+                        data0 = pd.read_csv(self.file_list[chosen])
+            
+                        self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
+            
+                        self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
+                        self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
+            
+                        if self.process_info:
+                            end = time.time()
+                            poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
+            self.total_num_stock = num_load
+            
+        else:
+            start = time.time()
 
-            self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
-            self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
-
-            if self.process_info:
-                end = time.time()
-                poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
+            self.total_num_stock = num_load
+            self.series_list = [None] * num_load
+            self.date_list = [None] * num_load
+            self.train_length = np.zeros(num_load, np.int32)
+            self.val_length = np.zeros(num_load, np.int32)
+            
+            for chosen in range(num_load):
+                data0 = pd.read_csv(self.file_list[chosen])
+    
+                self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
+    
+                self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
+                self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
+    
+                if self.process_info:
+                    end = time.time()
+                    poltRateOfProcess(chosen, num_load, end - start, 'loading')
+            self.has_loaded = True
 
     def chooseFeasibleData(
             self,
