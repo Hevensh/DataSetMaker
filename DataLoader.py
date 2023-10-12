@@ -122,7 +122,7 @@ class DataLoader:
                     self.train_length[:self.total_num_stock] = temp_train_length
                     self.val_length[:self.total_num_stock] = temp_val_length
             
-                    for chosen in range(num_load):
+                    for chosen in range(self.total_num_stock, num_load):
                         data0 = pd.read_csv(self.file_list[chosen])
             
                         self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
@@ -132,7 +132,7 @@ class DataLoader:
             
                         if self.process_info:
                             end = time.time()
-                            poltRateOfProcess(chosen, self.total_num_stock, end - start, 'loading')
+                            poltRateOfProcess(chosen, num_load, end - start, 'loading')
             self.total_num_stock = num_load
             
         else:
