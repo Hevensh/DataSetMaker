@@ -138,7 +138,7 @@ class DataLoader:
                             mid = l + r >> 1
                         
                         self.train_length[chosen] = mid
-                        self.val_length[chosen] = self.seriesDate.shape[0] - mid
+                        self.val_length[chosen] = len(temp_data_list) - mid
             
                         if self.process_info:
                             end = time.time()
@@ -173,7 +173,7 @@ class DataLoader:
                     mid = l + r >> 1
                 
                 self.train_length[chosen] = mid
-                self.val_length[chosen] = self.seriesDate.shape[0] - mid
+                self.val_length[chosen] = len(temp_data_list) - mid
     
                 if self.process_info:
                     end = time.time()
