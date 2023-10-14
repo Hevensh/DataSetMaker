@@ -52,12 +52,9 @@ def poltRateOfProcess(k, total, time, process='processing', filename='file', sev
 
 
 def ilocSeries(data0):
-    ns2day = 24 * 60 * 60 * 1e9
     dates = pd.to_datetime(data0['Date'], utc=True)
-    dates_numpy = np.double(dates) / ns2day
-
     series = np.log(data0['Close'])
-    return dates_numpy, series, dates
+    return series, dates
 
 
 class DataLoader:
@@ -81,8 +78,8 @@ class DataLoader:
             # series_list (numpy type)
             # date_list
     ):
-        ns2day = 24 * 60 * 60 * 1e9
-        self.train_last_day = np.double(pd.Timestamp(last_day).to_numpy()) / ns2day
+        
+        self.train_last_day = pd.Timestamp(last_day).to_numpy()
 
         if num_load is None:
             num_load = len(self.file_list)
@@ -125,10 +122,23 @@ class DataLoader:
                     for chosen in range(self.total_num_stock, num_load):
                         data0 = pd.read_csv(self.file_list[chosen])
             
-                        self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
-            
-                        self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
-                        self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
+                        self.series_list[chosen], temp_data_list = pre_process_fun(data0)
+                        self.date_list[chosen] = temp_data_list
+                        
+                        l = 0
+                        r = len(dates) - 1
+                        mid = l + r >> 1
+                        
+                        while l != r:
+                            print(l,r,mid)
+                            if temp_data_list[l].to_numpy() <= self.train_last_day:
+                                l = mid + 1
+                            else:
+                                r = mid
+                            mid = l + r >> 1
+                        
+                        self.train_length[chosen] = mid
+                        self.val_length[chosen] = self.seriesDate.shape[0] - mid
             
                         if self.process_info:
                             end = time.time()
@@ -147,10 +157,23 @@ class DataLoader:
             for chosen in range(num_load):
                 data0 = pd.read_csv(self.file_list[chosen])
     
-                self.seriesDate, self.series_list[chosen], self.date_list[chosen] = pre_process_fun(data0)
-    
-                self.train_length[chosen] = (self.seriesDate < self.train_last_day).sum()
-                self.val_length[chosen] = (self.seriesDate.shape[0] - self.train_length[chosen])
+                self.series_list[chosen], temp_data_list = pre_process_fun(data0)
+                self.date_list[chosen] = temp_data_list
+
+                l = 0
+                r = len(dates) - 1
+                mid = l + r >> 1
+                
+                while l != r:
+                    print(l,r,mid)
+                    if temp_data_list[l].to_numpy() <= self.train_last_day:
+                        l = mid + 1
+                    else:
+                        r = mid
+                    mid = l + r >> 1
+                
+                self.train_length[chosen] = mid
+                self.val_length[chosen] = self.seriesDate.shape[0] - mid
     
                 if self.process_info:
                     end = time.time()
