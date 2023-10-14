@@ -126,7 +126,7 @@ class DataLoader:
                         self.date_list[chosen] = temp_data_list
                         
                         l = 0
-                        r = len(dates) - 1
+                        r = len(temp_data_list) - 1
                         mid = l + r >> 1
                         
                         while l != r:
@@ -161,7 +161,7 @@ class DataLoader:
                 self.date_list[chosen] = temp_data_list
 
                 l = 0
-                r = len(dates) - 1
+                r = len(temp_data_list) - 1
                 mid = l + r >> 1
                 
                 while l != r:
