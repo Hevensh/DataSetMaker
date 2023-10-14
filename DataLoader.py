@@ -130,7 +130,6 @@ class DataLoader:
                         mid = l + r >> 1
                         
                         while l != r:
-                            print(l,r,mid)
                             if temp_data_list[l].to_numpy() <= self.train_last_day:
                                 l = mid + 1
                             else:
@@ -165,7 +164,6 @@ class DataLoader:
                 mid = l + r >> 1
                 
                 while l != r:
-                    print(l,r,mid)
                     if temp_data_list[l].to_numpy() <= self.train_last_day:
                         l = mid + 1
                     else:
