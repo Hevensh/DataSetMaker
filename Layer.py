@@ -8,7 +8,7 @@ class StockLoRA(Model):
         dim_latent,
         rank=2,
         **kwargs,):
-        super().__init__()
+        super().__init__(kwargs)
         self.num_stocks = num_stocks
         self.embedA = layers.Embedding(num_stocks,dim_latent*rank,)
         self.embedB = layers.Embedding(num_stocks,dim_latent*rank,
@@ -21,4 +21,24 @@ class StockLoRA(Model):
         r = tf.einsum('bij,bjk->bik',latent,loraA)
         outputs = tf.einsum('bij,bkj->bik',r,loraB)
         return outputs
-      
+
+
+class DateEmbbeding(Model):
+    def __init__(
+        self,
+        num_embeds,
+        dims,
+        **kwargs,):
+        super().__init__(kwargs)
+        self.num_embeds = len(num_embeds)
+        self.embeds = [layers.Embedding(i, dims) for i in num_embeds]
+        self.sum = layers.Add()
+        
+    def call(self, inputs):
+        outputs = [
+            embed_i(input_i)
+            for input_i, embed_i 
+            in zip(tf.unstack(inputs, axis=-1), self.embeds)
+        ]
+
+        return self.sum(outputs)
