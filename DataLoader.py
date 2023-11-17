@@ -383,8 +383,8 @@ class DataLoader:
         inputs_train = (
             tf.cast(self.train_Et / (self.train_Et.std(axis=-1, keepdims=True) + eps), tf.float32),
             tf.cast(self.train_Beta[:, :, 1:], tf.float32),
-            tf.cast(self.train_M, tf.int32),
-            tf.cast(self.train_W, tf.int32),
+            tf.stack([tf.cast(self.train_M, tf.int32),
+            tf.cast(self.train_W, tf.int32)], axis=-1),
             tf.cast(self.train_S, tf.int32),
         )
         targets_train = np.zeros_like(self.train_Beta_target[:, :, 1], np.int32)
@@ -395,8 +395,8 @@ class DataLoader:
         inputs_val = (
             tf.cast(self.val_Et / (self.val_Et.std(axis=-1, keepdims=True) + eps), tf.float32),
             tf.cast(self.val_Beta[:, :, 1:], tf.float32),
-            tf.cast(self.val_M, tf.int32),
-            tf.cast(self.val_W, tf.int32),
+            tf.stack([tf.cast(self.val_M, tf.int32),
+            tf.cast(self.val_W, tf.int32)], axis=-1),
             tf.cast(self.val_S, tf.int32),
         )
         targets_val = np.zeros_like(self.val_Beta_target[:, :, 1], np.int32)
