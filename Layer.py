@@ -23,7 +23,7 @@ class StockLoRA(Model):
         beta = self.beta(indexStock)
         r = tf.einsum('bij,bjk->bik',latent,loraA)
         outputs = tf.einsum('bij,bkj->bik',r,loraB)
-        return outputs + beta
+        return outputs + beta[:,None]
 
 
 class DateEmbbeding(Model):
