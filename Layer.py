@@ -13,14 +13,17 @@ class StockLoRA(Model):
         self.embedA = layers.Embedding(num_stocks,dim_latent*rank,)
         self.embedB = layers.Embedding(num_stocks,dim_latent*rank,
                                        embeddings_initializer='zeros',)
+        self.beta = layers.Embedding(num_stocks,dim_latent,
+                                       embeddings_initializer='zeros',)
         self.reshape = layers.Reshape((dim_latent,rank))
         
     def call(self, latent, indexStock):
         loraA = self.reshape(self.embedA(indexStock))
         loraB = self.reshape(self.embedB(indexStock))
+        beta = self.beta(indexStock)
         r = tf.einsum('bij,bjk->bik',latent,loraA)
         outputs = tf.einsum('bij,bkj->bik',r,loraB)
-        return outputs
+        return outputs + beta
 
 
 class DateEmbbeding(Model):
