@@ -8,7 +8,7 @@ class StockLoRA(Model):
         dim_latent,
         rank=2,
         **kwargs,):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.num_stocks = num_stocks
         self.embedA = layers.Embedding(num_stocks,dim_latent*rank,)
         self.embedB = layers.Embedding(num_stocks,dim_latent*rank,
@@ -32,7 +32,7 @@ class DateEmbbeding(Model):
         num_embeds,
         dims,
         **kwargs,):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.num_embeds = len(num_embeds)
         self.embeds = [layers.Embedding(i, dims) for i in num_embeds]
         self.sum = layers.Add()
